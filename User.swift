@@ -13,7 +13,7 @@ class User: NSObject {
     var name: String?
     var screenName: String?
     var tagline: String?
-    var profileUrl: NSURL?
+    var profileUrl: URL?
     
     var dictionary: NSDictionary?
     
@@ -25,12 +25,14 @@ class User: NSObject {
         tagline = dictionary["description"] as? String
         
         if let profileUrlString = dictionary["profile_image_url_https"] as? String {
-            profileUrl = NSURL(string: profileUrlString)
+            profileUrl = URL(string: profileUrlString)
         }
         
     }
     
+    
     static var _currentUser: User?
+    static let userDidLogoutNotification = "UserDidLogout"
     
     class var currentUser: User? {
         // a block of code that run when sb tries to access this property
@@ -41,8 +43,8 @@ class User: NSObject {
                 let userData = defaults.object(forKey: "currentUserData") as? Data
                 // if there is,turn currentUserData back to the user JSON data and store it in currentUser & return currentUser
                 if let userData = userData {
-                    let dictionary = try! JSONSerialization.jsonObject(with: userData, options: []) as! NSDictionary
-                    _currentUser = User(dictionary: dictionary)
+                    let dictionary = try! JSONSerialization.jsonObject(with: userData, options: .allowFragments)
+                    _currentUser = User(dictionary: dictionary as! NSDictionary)
                 }   
             }
             
@@ -59,7 +61,7 @@ class User: NSObject {
                 
                 defaults.set(data, forKey: "currentUserData")
             } else {
-                defaults.set(nil, forKey: "currentUserData")
+                defaults.removeObject(forKey: "currentUserData")
             }
             
             defaults.synchronize()
