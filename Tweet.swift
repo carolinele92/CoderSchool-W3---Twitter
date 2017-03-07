@@ -15,7 +15,8 @@ class Tweet: NSObject {
     var text: String?
     var retweetCount: Int = 0
     var favoritesCount: Int = 0
-    var timestamp: String?
+    var shortTimestamp: String?
+    var longTimestamp: String?
     
         // retweet
     var isRetweet: Bool?
@@ -44,7 +45,7 @@ class Tweet: NSObject {
             retweetUsername = retweetUser["name"] as? String  
             
            
-        // Not retweeted
+        // No retweet
         } else {
             self.isRetweet = false
             
@@ -57,22 +58,29 @@ class Tweet: NSObject {
            
         }
         
+        // action buttons
+            isFavorited = dictionary["favorited"] as! Bool
+            isRetweeted = dictionary["retweeted"] as! Bool
         
-        // Timestamp
+     
+        // timestamp
         let timestampString = dictionary["created_at"] as? String
+        
         if let timestampString = timestampString {
+            
             let formatter = DateFormatter()
             formatter.dateFormat = "EEE MMM d HH:mm:ss Z y"
             
+            // Short Timestamp
             let formattedTimestamp = formatter.date(from: timestampString)! // change string to date
-            timestamp = Tweet.formatTweetTimeStamp((formattedTimestamp.timeIntervalSinceNow))
+            shortTimestamp = Tweet.formatTweetTimeStamp((formattedTimestamp.timeIntervalSinceNow))
+            
+            // Long timestamp
+            formatter.dateFormat = "M/d/yy, HH:mm a"
+            formatter.amSymbol = "AM"
+            formatter.pmSymbol = "PM"
+            longTimestamp = formatter.string(from: formattedTimestamp)
         }
-        
-        // action buttons
-        isFavorited = dictionary["favorited"] as! Bool
-        isRetweeted = dictionary["retweeted"] as! Bool
-        
-        
         
     }
     
@@ -91,7 +99,7 @@ class Tweet: NSObject {
     }
 
     
-    // Timestamp - Time interval since now
+    // Short timestamp - Time interval since now
     class func formatTweetTimeStamp(_ timeStamp: TimeInterval) -> String{
         var time = Int(timeStamp)
         var timeSinceTweet: Int = 0

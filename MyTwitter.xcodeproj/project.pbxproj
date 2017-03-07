@@ -96,8 +96,8 @@
 			children = (
 				82ACBB5B1E66BBAB0074A715 /* LoginVC.swift */,
 				82583B351E6B20B5004F3EB9 /* TweetsVC.swift */,
-				82583B3C1E6D158A004F3EB9 /* ComposeTweetVC.swift */,
 				82BC594C1E6DBAEA00337E1C /* TweetDetailsVC.swift */,
+				82583B3C1E6D158A004F3EB9 /* ComposeTweetVC.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";

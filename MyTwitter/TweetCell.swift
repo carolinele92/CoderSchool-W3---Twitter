@@ -50,7 +50,7 @@ class TweetCell: UITableViewCell {
             nameLabel.text = tweet.user?.name
             screennameLabel.text = "@\(tweet.user!.screenName!)"
             tweetTextLabel.text = tweet.text
-            timestampLabel.text = tweet.timestamp
+            timestampLabel.text = tweet.shortTimestamp
             profileImage.setImageWith((tweet.user?.profileUrl)!)
             
             

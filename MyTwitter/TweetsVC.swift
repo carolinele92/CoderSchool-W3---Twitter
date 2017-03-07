@@ -13,6 +13,7 @@ class TweetsVC: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
     var tweets: [Tweet]!
+    let refreshControl = UIRefreshControl()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,18 +23,25 @@ class TweetsVC: UIViewController {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 100
         
+        self.navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo"))
+        
+        // Refresh control
+        refreshControl.addTarget(self, action: #selector(refreshControlAction(_:)), for: UIControlEvents.valueChanged)
+        tableView.insertSubview(refreshControl, at: 0)
+        
         
         getTweets()
 
     }
 
-
+// --- Get tweet
     func getTweets() {
         TwitterClient.sharedInstance?.getHomeTimeline(success: { (tweets: [Tweet]) in
             
             self.tweets = tweets
             
             self.tableView.reloadData()
+            self.refreshControl.endRefreshing()
             
         }, failure: { (error: Error) in
             print (error.localizedDescription)
@@ -41,10 +49,17 @@ class TweetsVC: UIViewController {
     }
     
     
-    
+// --- Logout
     @IBAction func onLogout(_ sender: UIBarButtonItem) {
         TwitterClient.sharedInstance?.logout()
     }
+    
+    
+// --- Refresh Control action
+    func refreshControlAction(_ refreshControl: UIRefreshControl) {
+        getTweets()
+    }
+    
 
 }
 
@@ -116,6 +131,7 @@ extension TweetsVC: UITableViewDelegate, UITableViewDataSource, TweetCellDelegat
         if tweet.isFavorited {
             TwitterClient.sharedInstance?.unFavorite(tweet: tweet.id, success: {
                 
+                
                 tweet.favoritesCount = tweet.favoritesCount - 1
                 tweetCell.favoriteCountLabel.text = String(describing: tweet.favoritesCount)
                 tweet.isFavorited = false
@@ -123,7 +139,7 @@ extension TweetsVC: UITableViewDelegate, UITableViewDataSource, TweetCellDelegat
                 self.tableView.reloadData()
                 
             }, failure: { (error: Error) in
-                print("Error with unfavorite")
+                print("Error with unfavorite = \(error)")
             })
             
         } else {
@@ -141,7 +157,8 @@ extension TweetsVC: UITableViewDelegate, UITableViewDataSource, TweetCellDelegat
     }
     
 
-// --- Compose Tweet
+// --- ComposeTweetDelegate
+
     
     func composeTweet(composeTweetVC: ComposeTweetVC, tweetText text: String) {
         let path = text.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
@@ -155,11 +172,21 @@ extension TweetsVC: UITableViewDelegate, UITableViewDataSource, TweetCellDelegat
     }
     
     
-    
+// --- Prepare for Segues
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "composeTweetSegue" {
             let vc = segue.destination as! ComposeTweetVC
+            vc.delegate = self
+            
+        } else if segue.identifier == "detailsSegue" {
+            let cell = sender as! TweetCell
+            let indexPath = tableView.indexPath(for: cell)
+            let tweet = tweets![indexPath!.row]
+            
+            let vc = segue.destination as! TweetDetailsVC
+            vc.tweet = tweet
+            vc.tweetCell = cell
             vc.delegate = self
         }
     
